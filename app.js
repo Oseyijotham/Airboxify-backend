@@ -1,7 +1,7 @@
 import express from "express";
 import logger from "morgan";
 import cors from "cors";
-import { router as contactsRouter } from "./routes/api/contactsRouter.js";
+import { router as contactsRouter } from "./routes/api/appointmentsRouter.js";
 import { router as usersRouter } from "./routes/api/usersRouter.js";
 
 const app = express();
@@ -19,13 +19,19 @@ app.use(express.static("public"));
 app.use("/api/contacts", contactsRouter);
 app.use("/api/users", usersRouter);
 
-app.use((_req, res) => {
+app.use((req, res) => {
   res.status(404).json({ message: "Not found" });
 });
 
-app.use((err, _req, res, _next) => {
-  const { status = 500, message = "Server error" } = err;
-  res.status(status).json({ message });
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error(err.stack); // Log the error for debugging
+  const statusCode = err.status || 500; // Default to 500 if no status code is set
+  res.status(statusCode).json({
+    error: {
+      message: err.message || 'Internal Server Error', // Default message if none is provided
+    },
+  });
 });
 
 export { app };

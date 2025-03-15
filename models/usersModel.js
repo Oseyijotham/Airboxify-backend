@@ -23,9 +23,13 @@ const userSchema = new Schema(
       type: String,
       required: [true, "Set phone for User"],
     },
+    /*avatarURL: {
+      type: String,
+      default: "https://oasis-tasks-backend.onrender.com/avatars/Unknown.png",
+    },*/
     avatarURL: {
       type: String,
-      default: "/avatars/Unknown.png",
+      default: "http://localhost:8000/avatars/Unknown.png",
     },
     token: {
       type: String,

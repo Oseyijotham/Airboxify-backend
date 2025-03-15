@@ -1,9 +1,7 @@
 import { Contact } from "../models/contactsModel.js";
-// prettier-ignore
 import {
   contactValidation,
-  updateNameValidation,
-  updateEmailValidation,
+  updateNameValidation
 } from "../validations/validation.js";
 import { httpError } from "../helpers/httpError.js";
 import path from "path";
@@ -13,15 +11,30 @@ import "dotenv/config";
 import Jimp from "jimp";
 import "dotenv/config";
 
-const getAllContacts = async (req, res) => {
+const addAppointment = async (req, res) => {
+  // Preventing lack of necessary data for contacts (check validations folder)
+  const { _id } = req.user;
+  const { error } = contactValidation.validate(req.body);
+
+  if (error) {
+    throw httpError(400, "missing required fields");
+  }
+
+  await Contact.create({ ...req.body, owner: _id });
+  const result = await Contact.find({ owner: _id }).sort({ _id: -1 });
+  console.log({ ...req.body, owner: _id });
+  res.status(201).json(result);
+};
+
+const getAllAppointments = async (req, res) => {
   const { _id } = req.user;
 
-  const result = await Contact.find({ owner: _id });
+  const result = await Contact.find({ owner: _id }).sort({ _id: -1 });
 
   res.json(result);
 };
 
-const updateContactAvatar = async (req, res) => {
+const updateAppointmentAvatar = async (req, res) => {
   const { contactId } = req.params;
   const { path: oldPath, originalname } = req.file;
   const verificationToken = uuid4();
@@ -57,7 +70,7 @@ const updateContactAvatar = async (req, res) => {
   res.status(200).json({ avatarURL });
 };
 
-const getContactById = async (req, res) => {
+const getAppointmentById = async (req, res) => {
   const { contactId } = req.params;
   const result = await Contact.findById(contactId);
 
@@ -68,30 +81,20 @@ const getContactById = async (req, res) => {
   res.json(result);
 };
 
-const addContact = async (req, res) => {
-  // Preventing lack of necessary data for contacts (check validations folder)
+
+
+const deleteAppointmentById = async (req, res) => {
   const { _id } = req.user;
-  const { error } = contactValidation.validate(req.body);
-
-  if (error) {
-    throw httpError(400, "missing required fields");
-  }
-
-  
-   const result = await Contact.create({ ...req.body, owner: _id });
-   console.log({ ...req.body, owner: _id });
-  res.status(201).json(result);
-};
-
-const deleteContactById = async (req, res) => {
   console.log(req.params);
   const { contactId } = req.params;
-  const result = await Contact.findByIdAndDelete(contactId);
+  const deleted = await Contact.findByIdAndDelete(contactId);
 
-  if (!result) {
+  if (!deleted) {
     throw httpError(404);
   }
-const avatarsDir = path.join("public", "avatars");  
+
+  const result = await Contact.find({ owner: _id }).sort({ _id: -1 });
+  const avatarsDir = path.join("public", "avatars");
   const files = await fs.readdir(avatarsDir);
   for (const file of files) {
     // Check if the file contains the same _id
@@ -102,12 +105,10 @@ const avatarsDir = path.join("public", "avatars");
       break; // Exit the loop once the matching file is deleted
     }
   }
-  res.json({
-    message: "Contact deleted",
-  });
+  res.json(result);
 };
 
-const updateContactNameById = async (req, res) => {
+const updateAppointmentNameById = async (req, res) => {
   // Preventing lack of necessary data for contacts (check validations folder)
   const { error } = updateNameValidation.validate(req.body);
   if (error) {
@@ -126,10 +127,7 @@ const updateContactNameById = async (req, res) => {
   res.json(result);
 };
 
-const updateContactEmailById = async (req, res) => {
-
-  
-
+const updateAppointmentEmailById = async (req, res) => {
   const { contactId } = req.params;
   const result = await Contact.findByIdAndUpdate(contactId, req.body, {
     new: true,
@@ -142,8 +140,7 @@ const updateContactEmailById = async (req, res) => {
   res.json(result);
 };
 
-const updateContactPhoneById = async (req, res) => {
-
+const updateAppointmentDueDateById = async (req, res) => {
   const { contactId } = req.params;
   const result = await Contact.findByIdAndUpdate(contactId, req.body, {
     new: true,
@@ -156,7 +153,7 @@ const updateContactPhoneById = async (req, res) => {
   res.json(result);
 };
 
-const updateTaskStatusById = async (req, res) => {
+const updateAppointmentStatusById = async (req, res) => {
   const { contactId } = req.params;
   const result = await Contact.findByIdAndUpdate(contactId, req.body, {
     new: true,
@@ -173,13 +170,13 @@ const updateTaskStatusById = async (req, res) => {
 
 // prettier-ignore
 export {
-  getAllContacts,
-  updateContactAvatar,
-  getContactById,
-  addContact,
-  deleteContactById,
-  updateContactNameById,
-  updateContactEmailById,
-  updateContactPhoneById,
-  updateTaskStatusById,
+  addAppointment,
+  getAllAppointments,
+  updateAppointmentAvatar,
+  getAppointmentById,
+  deleteAppointmentById,
+  updateAppointmentNameById,
+  updateAppointmentEmailById,
+  updateAppointmentDueDateById,
+  updateAppointmentStatusById,
 };
