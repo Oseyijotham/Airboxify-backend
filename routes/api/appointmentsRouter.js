@@ -2,7 +2,7 @@ import express from "express";
 import { ctrlWrapper } from "../../helpers/ctrlWrapper.js";
 // prettier-ignore
 import {
-addAppointment,
+  addAppointment,
   getAllAppointments,
   updateAppointmentAvatar,
   getAppointmentById,
@@ -11,6 +11,8 @@ addAppointment,
   updateAppointmentEmailById,
   updateAppointmentDueDateById,
   updateAppointmentStatusById,
+  updateClientAvatar,
+  updatemyClientAvatar,
 } from "../../controllers/appointmentsController.js";
 import { authenticateToken } from "../../middlewares/authenticateToken.js";
 import { upload } from "../../middlewares/upload.js";
@@ -26,7 +28,7 @@ router.post("/", authenticateToken, ctrlWrapper(addAppointment));
 
 router.delete("/:contactId", authenticateToken, ctrlWrapper(deleteAppointmentById));
 
-router.patch("/avatars/:contactId", authenticateToken, upload.single("avatar"), ctrlWrapper(updateAppointmentAvatar));
+router.patch("/avatars/:contactId", authenticateToken, upload.single("avatar"), ctrlWrapper(updatemyClientAvatar));
 
 
 router.patch("/nameupdate/:contactId", authenticateToken, ctrlWrapper(updateAppointmentNameById));

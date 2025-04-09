@@ -29,7 +29,7 @@ const userSchema = new Schema(
     },*/
     avatarURL: {
       type: String,
-      default: "http://localhost:8000/avatars/Unknown.png",
+      default: "http://localhost:8000/avatars/unknownUser.png",
     },
     token: {
       type: String,
