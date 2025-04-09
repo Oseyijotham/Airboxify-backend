@@ -27,9 +27,9 @@ const contactSchema = new Schema(
       ref: "user",
       required: true,
     },
-   avatarURL: {
+    avatarURL: {
       type: String,
-      default: "https://oasis-tasks-backend.onrender.com/avatars/Unknown.png",
+      default: "https://airboxify-backend.onrender.com/avatars/unknownCustomer.png",
     },
     /*avatarURL: {
       type: String,

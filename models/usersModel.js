@@ -23,14 +23,14 @@ const userSchema = new Schema(
       type: String,
       required: [true, "Set phone for User"],
     },
-    /*avatarURL: {
-      type: String,
-      default: "https://oasis-tasks-backend.onrender.com/avatars/Unknown.png",
-    },*/
     avatarURL: {
       type: String,
-      default: "http://localhost:8000/avatars/unknownUser.png",
+      default: "https://airboxify-backend.onrender.com/avatars/unknownUser.png",
     },
+    /*avatarURL: {
+      type: String,
+      default: "http://localhost:8000/avatars/unknownUser.png",
+    },*/
     token: {
       type: String,
       default: null,
