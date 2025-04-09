@@ -27,14 +27,14 @@ const contactSchema = new Schema(
       ref: "user",
       required: true,
     },
-   /*avatarURL: {
+   avatarURL: {
       type: String,
       default: "https://oasis-tasks-backend.onrender.com/avatars/Unknown.png",
-    },*/
-    avatarURL: {
+    },
+    /*avatarURL: {
       type: String,
       default: "http://localhost:8000/avatars/unknownCustomer.png"
-    },
+    },*/
     groups: {
       type: Array,
       default: ["favourites"],
