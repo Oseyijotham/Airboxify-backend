@@ -12,7 +12,7 @@ app.use(logger(formatsLogger));
 app.use(cors());
 app.use(express.json());
 
-app.get("/keepalive", (req, res) => {
+app.get("/api/keepalive", (req, res) => {
   console.log(" Keepalive ping received at", new Date().toISOString());
   res.sendStatus(200);
 });
