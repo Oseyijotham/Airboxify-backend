@@ -12,6 +12,11 @@ app.use(logger(formatsLogger));
 app.use(cors());
 app.use(express.json());
 
+app.get("/keepalive", (req, res) => {
+  console.log(" Keepalive ping received at", new Date().toISOString());
+  res.sendStatus(200);
+});
+
 // tells Express to serve static files from the public directory and not the app.js file)
 // open http://localhost:3000/avatars/665c98dca10f7f28dc9eb8b2.jpeg on browser
 app.use(express.static("public"));
