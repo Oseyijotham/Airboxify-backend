@@ -238,7 +238,7 @@ const getAppointmentById = async (req, res) => {
     throw httpError(404, "Contact ID Not Found");
   }
 
-  res.json(result);
+  res.status(200).json(result);
 };
 
 
