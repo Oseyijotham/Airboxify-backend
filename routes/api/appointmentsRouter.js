@@ -28,7 +28,7 @@ router.post("/", authenticateToken, ctrlWrapper(addAppointment));
 
 router.delete("/:contactId", authenticateToken, ctrlWrapper(deleteAppointmentById));
 
-router.patch("/avatars/:contactId", authenticateToken, upload.single("avatar"), ctrlWrapper(updatemyClientAvatar));
+router.patch("/avatars/:contactId", authenticateToken, upload.single("avatar"), ctrlWrapper(updateAppointmentAvatar));
 
 
 router.patch("/nameupdate/:contactId", authenticateToken, ctrlWrapper(updateAppointmentNameById));

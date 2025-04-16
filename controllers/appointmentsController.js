@@ -15,7 +15,7 @@ import { UploadClient } from "@uploadcare/upload-client";
 import { storeFile, UploadcareSimpleAuthSchema } from "@uploadcare/rest-client";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import AWS from "aws-sdk";
-
+import sharp from "sharp";
 
 const {
  publicKey,
@@ -47,7 +47,7 @@ const s3 = new AWS.S3({
 
 
 
-/*
+
 const {
   CLOUDINARY_CLOUD_NAME,
   CLOUDINARY_API_KEY,
@@ -61,7 +61,7 @@ cloudinary.config({
   api_key: CLOUDINARY_API_KEY,
   api_secret: CLOUDINARY_API_SECRET, 
 });
-*/
+
 
 const addAppointment = async (req, res) => {
   // Preventing lack of necessary data for contacts (check validations folder)
@@ -88,17 +88,23 @@ const getAllAppointments = async (req, res) => {
 
 const updateAppointmentAvatar = async (req, res) => {
   const { contactId } = req.params;
-  const { path: oldPath } = req.file;
-
-  //Getting the image from the tmp folder, resizing it and overwriting the previous image with the resized one
-  await Jimp.read(oldPath).then((image) =>
-    // image.resize(250, 250).write(oldPath)
-    image.cover(250, 250).write(oldPath)
-  );
+  const { path: oldPath, originalname } = req.file;
 
   const filename = `${contactId}`; //creating a new unique filename for the image
+  const extension = path.extname(originalname);
+  const filenamePath = `${contactId}${extension}`;
 
-  const result = await cloudinary.uploader.upload(oldPath, {
+  const newPath = path.join("public", "avatars", filenamePath);
+
+  //Getting the image from the tmp folder, resizing it and overwriting the previous image with the resized one
+  await sharp(oldPath)
+    .resize(250, 250, {
+      fit: "cover", // Crop to fill 250×250
+      position: "center", // Crop from center (default)
+    })
+    .toFile(newPath);
+
+  const result = await cloudinary.uploader.upload(newPath, {
     folder: "customerAvatars", // This creates a folder in Cloudinary
     public_id: filename,
     overwrite: true,
@@ -108,6 +114,8 @@ const updateAppointmentAvatar = async (req, res) => {
   await fs.unlink(oldPath);
 
   const avatarURL = result.secure_url;
+  //const avatarURL = `https://res.cloudinary.com/airboxify-cloud/image/upload/f_auto,q_auto/customerAvatars/${filename}.${result.format}`;
+  console.log(avatarURL);
 
   await Contact.findByIdAndUpdate(contactId, { avatarURL });
   res.status(200).json({ avatarURL });
@@ -173,25 +181,51 @@ const updateClientAvatar = async (req, res) => {
 
 const updatemyClientAvatar = async (req, res) => {
   const { contactId } = req.params;
-  const { path: oldPath } = req.file;
+  const { path: oldPath, originalname } = req.file;
 
+  //const extension = path.extname(originalname);
   const filename = `${contactId}`; //creating a new unique filename for the image
 
+  //const newPath = path.join("public", "avatars", filename);
+
   try {
+    
+
     // Get file binary data
     const binaryData = await fs.readFile(oldPath);
 
     console.log("File size (bytes):", binaryData.length);
 
-     const result = await s3
-       .upload({
-         Bucket: "Airboxify",
-         Key: `uploads/${filename}`, // Optional folder structure
-         Body: binaryData,
-         
-       })
+    try {await s3
+      .headObject({ Bucket: "Airboxify", Key: `uploads/${filename}` })
       .promise();
-    console.log("Public URL:", result.Location);
+     await s3
+       .deleteObject({
+         Bucket: "Airboxify",
+         Key: `uploads/${filename}`,
+       })
+        .promise();
+      await s3
+        .upload({
+          Bucket: "Airboxify",
+          Key: `uploads/${filename}`, // Optional folder structure
+          Body: binaryData,
+        })
+        .promise();
+      }
+    catch (err) {
+        const result = await s3
+          .upload({
+            Bucket: "Airboxify",
+            Key: `uploads/${filename}`, // Optional folder structure
+            Body: binaryData,
+          })
+        .promise();
+      console.log("Public URL:", result.Location);
+    }
+
+   
+    
     
      const signedUrl = s3.getSignedUrl("getObject", {
        Bucket: "Airboxify",
@@ -265,6 +299,12 @@ const deleteAppointmentById = async (req, res) => {
       break; // Exit the loop once the matching file is deleted
     }
   }
+  await s3
+    .deleteObject({
+      Bucket: "Airboxify",
+      Key: `uploads/${contactId}`,
+    })
+    .promise();
   res.json(result);
 };
 
