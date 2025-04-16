@@ -24,15 +24,13 @@ const {
   secretAccessKey
 } = process.env;
 
-// Configure proxy
-const proxyAgent = new HttpsProxyAgent("http://152.230.215.123");
+
 
 const client = new UploadClient({ publicKey: publicKey });
 
 const uploadcareSimpleAuthSchema = new UploadcareSimpleAuthSchema({
   publicKey: publicKey,
-  secretKey: secretKey,
-  //httpAgent: proxyAgent,
+  secretKey: secretKey
 });
 
 const s3 = new AWS.S3({
