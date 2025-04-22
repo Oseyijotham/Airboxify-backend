@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
-import Jimp from "jimp";
+import path from "path";
 //import path from "path";
 import fs from "fs/promises";
 import { User } from "../models/usersModel.js";
@@ -10,6 +10,7 @@ import { httpError } from "../helpers/httpError.js";
 //import { sendEmail } from "../helpers/sendEmail.js";
 //import { v4 as uuid4 } from "uuid";
 import { v2 as cloudinary } from "cloudinary";
+import sharp from "sharp";
 
 
 const {
@@ -145,30 +146,39 @@ const getCurrentUsers = async (req, res) => {
 
 const updateAvatar = async (req, res) => {
   const { _id } = req.user;
-  const { path: oldPath } = req.file;
-
-  //Getting the image from the tmp folder, resizing it and overwriting the previous image with the resized one
-  await Jimp.read(oldPath).then((image) =>
-    image.cover(250, 250).write(oldPath)
-  );
+  const { path: oldPath, originalname } = req.file;
 
   const filename = `${_id}`; //creating a new unique filename for the image
+  const extension = path.extname(originalname);
+  const filenamePath = `${_id}${extension}`;
 
+  const newPath = path.join("public", "avatars", filenamePath);
+
+  //Getting the image from the tmp folder, resizing it and overwriting the previous image with the resized one
+    await sharp(oldPath)
+      .resize(250, 250, {
+        fit: "cover", // Crop to fill 250×250
+        position: "center", // Crop from center (default)
+      })
+      .toFile(newPath);
   
-    const result = await cloudinary.uploader.upload(oldPath, {
-      folder: "userAvatars", // This creates a folder in Cloudinary
+    const result = await cloudinary.uploader.upload(newPath, {
+      folder: "customerAvatars", // This creates a folder in Cloudinary
       public_id: filename,
       overwrite: true,
     });
-
-    // Delete the local file after upload
+  
+    // Delete the local files after upload
     await fs.unlink(oldPath);
-
+    await fs.unlink(newPath);
+  
     const avatarURL = result.secure_url;
+    
 
-    await User.findByIdAndUpdate(_id, { avatarURL });
 
-    res.status(200).json({ avatarURL });
+  await User.findByIdAndUpdate(_id, { avatarURL });
+
+  res.status(200).json({ avatarURL });
 };
  
 
