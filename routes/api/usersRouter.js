@@ -10,7 +10,7 @@ const router = express.Router();
 router.post("/signup", ctrlWrapper(signupUser));
 
 
-router.post("/login", loginUser);
+router.post("/login", ctrlWrapper(loginUser));
 
 router.get("/logout", authenticateToken, ctrlWrapper(logoutUser));
 

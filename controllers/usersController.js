@@ -12,6 +12,12 @@ import { httpError } from "../helpers/httpError.js";
 import { v2 as cloudinary } from "cloudinary";
 import sharp from "sharp";
 
+/*GO TO THE FOLDER CALLED "helpers", CLICK ON THE FILE CALLED ctrlWrapper.js AND CHECK OUT THE FUNCTION CALLED "ctrlWrapper". 
+IT IS BECAUSE OF THAT FUNCTION (ctrlWrapper) THAT WE DO NOT NEED TO ADD TRY AND CATCH BLOCKS IN THE CONTROLLER FUNCTIONS BELOW.
+IT IS MORE EFFICIENT TO USE THE FUNCTION (ctrlWrapper) than to repeat try and catch blocks in every controller function.
+*/
+
+//OBSERVE how the function (ctrlWrapper) is used in the usersRouter.js file located in folder called routes\api 
 
 const {
   SECRET_KEY,
@@ -68,10 +74,10 @@ const signupUser = async (req, res) => {
   });
 };
 
-const loginUser = async (req, res, next) => {
+const loginUser = async (req, res) => {
   const { email, password } = req.body;
   
-  try {
+  
     //  Login validation error
     const { error } = loginValidation.validate(req.body);
     if (error) {
@@ -111,11 +117,7 @@ const loginUser = async (req, res, next) => {
         groups: user.groups,
       },
     });
-  } catch (err) {
-
-    //Allows the caught error to be handled by the Global error handler where it is logged.
-    next(err);
-  }
+  
 };
 
 const logoutUser = async (req, res) => {
@@ -131,14 +133,14 @@ const logoutUser = async (req, res) => {
 const getCurrentUsers = async (req, res) => {
   const { firstname, lastname, email, phone, avatarURL, groups } = req.user;
 
-  res.json({
+  res.status(200).json({
     user: {
       firstname,
       lastname,
       email,
       phone,
       avatarURL,
-      groups
+      groups,
     },
   });
 };
