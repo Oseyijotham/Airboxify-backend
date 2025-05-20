@@ -32,7 +32,7 @@ const addAppointment = async (req, res) => {
   const { error } = contactValidation.validate(req.body);
 
   if (error) {
-    throw httpError(400, "missing required fields");
+    throw httpError(400);
   }
 
   await Contact.create({ ...req.body, owner: _id });
