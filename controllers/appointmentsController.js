@@ -31,6 +31,8 @@ const addAppointment = async (req, res) => {
   const { _id } = req.user;
   const { error } = contactValidation.validate(req.body);
 
+  console.log(req.body);
+
   if (error) {
     throw httpError(400);
   }
