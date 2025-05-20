@@ -35,7 +35,7 @@ const loginValidation = Joi.object({
   }),
 });
 
-// validation for updating customer name
+// validation for updating client name
 const updateNameValidation = Joi.object({
   name: Joi.string().required()
 });
@@ -54,7 +54,7 @@ const updateEmailValidation = Joi.object({
 // validation for adding/updating a contact
 const contactValidation = Joi.object({
   name: Joi.string().required(),
-  phone: Joi.string().required(),
+  dueDate: Joi.string().required(),
 });
 
 // validation for updating favorite field

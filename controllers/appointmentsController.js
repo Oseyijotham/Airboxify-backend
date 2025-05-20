@@ -27,7 +27,7 @@ cloudinary.config({
 
 
 const addAppointment = async (req, res) => {
-  // Preventing lack of necessary data for contacts (check validations folder)
+  
   const { _id } = req.user;
   const { error } = contactValidation.validate(req.body);
 

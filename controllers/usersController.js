@@ -2,7 +2,6 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
 import path from "path";
-//import path from "path";
 import fs from "fs/promises";
 import { User } from "../models/usersModel.js";
 import { signupValidation, loginValidation } from "../validations/validation.js";
@@ -17,7 +16,16 @@ IT IS BECAUSE OF THAT FUNCTION (ctrlWrapper) THAT WE DO NOT NEED TO ADD TRY AND 
 IT IS MORE EFFICIENT TO USE THE FUNCTION (ctrlWrapper) than to repeat try and catch blocks in every controller function.
 */
 
-//OBSERVE how the function (ctrlWrapper) is used in the usersRouter.js file located in folder called routes\api 
+//OBSERVE how the function (ctrlWrapper) is used in the usersRouter.js file located in folder called routes\api
+
+//Any error that is not specifically thrown will be handled by the Global error handler as error 500
+
+/*Also, authentication and authorization errors are thrown using the function called "authenticateToken" which is in
+the file called authenticateToken.js located in the folder called middlewares. So because of this we do not need to throw
+such errors in the controller functions below*/
+
+//OBSERVE how the function (authenticateToken) is used in the usersRouter.js file located in folder called routes\api
+
 
 const {
   SECRET_KEY,
@@ -96,11 +104,10 @@ const loginUser = async (req, res) => {
       throw httpError(401); //Unauthorized;
     }
 
-    // Any error below will be handled by the Global error handler as error 500
 
     // Generate JWT token
     const payload = { id: user._id };
-    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "23h" });
+    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "40m" });
 
     // Update user with the new token
     await User.findByIdAndUpdate(user._id, { token });
@@ -146,7 +153,7 @@ const getCurrentUsers = async (req, res) => {
 };
 
 
-const updateAvatar = async (req, res) => {
+const updateUserAvatar = async (req, res) => {
   const { _id } = req.user;
   const { path: oldPath, originalname } = req.file;
 
@@ -186,4 +193,4 @@ const updateAvatar = async (req, res) => {
 
 
 // prettier-ignore
-export { signupUser, loginUser, logoutUser, getCurrentUsers, updateAvatar };
+export { signupUser, loginUser, logoutUser, getCurrentUsers, updateUserAvatar };

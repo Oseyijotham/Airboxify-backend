@@ -10,7 +10,7 @@ const contactSchema = new Schema(
       type: String,
       default: "Enter task details",
     },
-    phone: {
+    dueDate: {
       type: String,
       required: [true, "Set phone for contact"],
     },
