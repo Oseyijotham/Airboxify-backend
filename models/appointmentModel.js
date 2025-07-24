@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 
-const contactSchema = new Schema(
+const appointmentSchema = new Schema(
   {
     name: {
       type: String,
@@ -8,7 +8,7 @@ const contactSchema = new Schema(
     },
     email: {
       type: String,
-      default: "Enter task details",
+      default: "Enter customer email",
     },
     dueDate: {
       type: String,
@@ -43,6 +43,6 @@ const contactSchema = new Schema(
   { versionKey: false }
 );
 
-const Contact = model("contact", contactSchema);
+const Appointment = model("contact", appointmentSchema);
 
-export { Contact };
+export { Appointment };

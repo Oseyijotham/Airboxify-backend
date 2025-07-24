@@ -18,7 +18,7 @@ IT IS MORE EFFICIENT TO USE THE FUNCTION (ctrlWrapper) than to repeat try and ca
 
 //OBSERVE how the function (ctrlWrapper) is used in the usersRouter.js file located in folder called routes\api
 
-//Any error that is not specifically thrown will be handled by the Global error handler as error 500
+//Any error that is NOT specifically thrown will be handled by the Global error handler as error 500
 
 /*Also, authentication and authorization errors are thrown using the function called "authenticateToken" which is in
 the file called authenticateToken.js located in the folder called middlewares. So because of this we do not need to throw
@@ -49,13 +49,13 @@ const signupUser = async (req, res) => {
   //  Registration validation error
   const { error } = signupValidation.validate(req.body);
   if (error) {
-    throw httpError(400); //Bad request;
+    throw httpError(400, `${error.details[0].message}`); //Bad request;
   }
 
   // Registration conflict error
   const user = await User.findOne({ email });
   if (user) {
-    throw httpError(409); //Conflict
+    throw httpError(409, "Email already in use"); //Conflict
   }
 
   const hashPassword = await bcrypt.hash(password, 10); //Encrypting password
@@ -89,19 +89,19 @@ const loginUser = async (req, res) => {
     //  Login validation error
     const { error } = loginValidation.validate(req.body);
     if (error) {
-      throw httpError(400); //Bad request;
+      throw httpError(400, `${error.details[0].message}`); //Bad request;
     }
 
     // Login auth error (email)
     const user = await User.findOne({ email });
     if (!user) {
-      throw httpError(401); //Unauthorized;
+      throw httpError(401, "Incorrect Email or Password"); //Unauthorized;
     }
 
     // Login auth error (password)
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw httpError(401); //Unauthorized;
+      throw httpError(401, "Incorrect Email or Password"); //Unauthorized;
     }
 
 
@@ -154,6 +154,9 @@ const getCurrentUsers = async (req, res) => {
 
 
 const updateUserAvatar = async (req, res) => {
+  if (req.file.mimetype !== "image/png" && req.file.mimetype !== "image/jpeg") {
+    throw httpError(400, 'Invalid image format, only PNG, JPG and JPEG are allowed'); // Only throws if neither PNG nor JPEG is chosen
+  }
   const { _id } = req.user;
   const { path: oldPath, originalname } = req.file;
 
@@ -172,7 +175,7 @@ const updateUserAvatar = async (req, res) => {
       .toFile(newPath);
   
     const result = await cloudinary.uploader.upload(newPath, {
-      folder: "customerAvatars", // This creates a folder in Cloudinary
+      folder: "userAvatars", // This creates a folder in Cloudinary
       public_id: filename,
       overwrite: true,
     });

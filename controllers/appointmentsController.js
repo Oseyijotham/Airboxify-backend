@@ -1,7 +1,8 @@
-import { Contact } from "../models/contactsModel.js";
+import { Appointment } from "../models/appointmentModel.js";
 import {
-  contactValidation,
-  updateNameValidation
+  appointmentValidation,
+  updateAppointmentNameValidation,
+  updateAppointmentEmailValidation,
 } from "../validations/validation.js";
 import { httpError } from "../helpers/httpError.js";
 import path from "path";
@@ -29,16 +30,16 @@ cloudinary.config({
 const addAppointment = async (req, res) => {
   
   const { _id } = req.user;
-  const { error } = contactValidation.validate(req.body);
+  const { error } = appointmentValidation.validate(req.body);
 
-  console.log(req.body);
+  //console.log(req.body);
 
   if (error) {
-    throw httpError(400);
+    throw httpError(400, error.details[0].message);
   }
 
-  await Contact.create({ ...req.body, owner: _id });
-  const result = await Contact.find({ owner: _id }).sort({ _id: -1 });
+  await Appointment.create({ ...req.body, owner: _id });
+  const result = await Appointment.find({ owner: _id }).sort({ _id: -1 });
   console.log({ ...req.body, owner: _id });
   res.status(201).json(result);
 };
@@ -46,18 +47,22 @@ const addAppointment = async (req, res) => {
 const getAllAppointments = async (req, res) => {
   const { _id } = req.user;
 
-  const result = await Contact.find({ owner: _id }).sort({ _id: -1 });
+  const result = await Appointment.find({ owner: _id }).sort({ _id: -1 });
 
   res.status(200).json(result);
 };
 
 const updateClientAvatar = async (req, res) => {
-  const { contactId } = req.params;
+
+   if (req.file.mimetype !== "image/png" && req.file.mimetype !== "image/jpeg") {
+      throw httpError(400, 'Invalid image format, only PNG, JPG and JPEG are allowed'); // Only throws if neither PNG nor JPEG is chosen
+    }
+  const { appointmentId } = req.params;
   const { path: oldPath, originalname } = req.file;
 
-  const filename = `${contactId}`; //creating a new unique filename for the image
+  const filename = `${appointmentId}`; //creating a new unique filename for the image
   const extension = path.extname(originalname);
-  const filenamePath = `${contactId}${extension}`;
+  const filenamePath = `${appointmentId}${extension}`;
 
   const newPath = path.join("public", "avatars", filenamePath);
 
@@ -81,18 +86,18 @@ const updateClientAvatar = async (req, res) => {
 
   const avatarURL = result.secure_url;
   //const avatarURL = `https://res.cloudinary.com/airboxify-cloud/image/upload/f_auto,q_auto/customerAvatars/${filename}.${result.format}`;
-  console.log(avatarURL);
+  //console.log(avatarURL);
 
-  await Contact.findByIdAndUpdate(contactId, { avatarURL });
+  await Appointment.findByIdAndUpdate(appointmentId, { avatarURL });
   res.status(200).json({ avatarURL });
 };
 
 const getAppointmentById = async (req, res) => {
-  const { contactId } = req.params;
-  const result = await Contact.findById(contactId);
+  const { appointmentId } = req.params;
+  const result = await Appointment.findById(appointmentId);
 
   if (!result) {
-    throw httpError(404, "Contact ID Not Found");
+    throw httpError(404, "Appointment Details Not Found");
   }
 
   res.status(200).json(result);
@@ -101,17 +106,17 @@ const getAppointmentById = async (req, res) => {
 
 const deleteAppointmentById = async (req, res) => {
   const { _id } = req.user;
-  console.log(req.params);
-  const { contactId } = req.params;
+  //console.log(req.params);
+  const { appointmentId } = req.params;
 
-  const deleted = await Contact.findByIdAndDelete(contactId);
+  const deleted = await Appointment.findByIdAndDelete(appointmentId);
 
   if (!deleted) {
-    throw httpError(404);
+    throw httpError(404, "Resource not found");
   }
-  const result = await Contact.find({ owner: _id }).sort({ _id: -1 });
+  const result = await Appointment.find({ owner: _id }).sort({ _id: -1 });
   
-  const filename = `${contactId}`; //Getting the filename for the image
+  const filename = `${appointmentId}`; //Getting the filename for the image
   const publicId = "customerAvatars/" + filename;
   await cloudinary.uploader.destroy(publicId, {
     resource_type: "image", // or "raw" if it's not an image
@@ -121,40 +126,45 @@ const deleteAppointmentById = async (req, res) => {
 };
 
 const updateAppointmentNameById = async (req, res) => {
-  // Preventing lack of necessary data for contacts (check validations folder)
-  const { error } = updateNameValidation.validate(req.body);
+  // Validating name update
+  const { error } = updateAppointmentNameValidation.validate(req.body);
   if (error) {
-    throw httpError(400, "missing fields");
+    throw httpError(400, error.details[0].message);
   }
 
-  const { contactId } = req.params;
-  const result = await Contact.findByIdAndUpdate(contactId, req.body, {
+  const { appointmentId } = req.params;
+  const result = await Appointment.findByIdAndUpdate(appointmentId, req.body, {
     new: true,
   });
 
   if (!result) {
-    throw httpError(404);
+    throw httpError(404, "Resource not found");
   }
 
   res.json(result);
 };
 
 const updateAppointmentEmailById = async (req, res) => {
-  const { contactId } = req.params;
-  const result = await Contact.findByIdAndUpdate(contactId, req.body, {
+  // Validating details update
+  const { error } = updateAppointmentEmailValidation.validate(req.body);
+  if (error) {
+    throw httpError(400, error.details[0].message);
+  }
+  const { appointmentId } = req.params;
+  const result = await Appointment.findByIdAndUpdate(appointmentId, req.body, {
     new: true,
   });
 
   if (!result) {
-    throw httpError(404);
+    throw httpError(404, "Resource not found");
   }
 
   res.json(result);
 };
 
 const updateAppointmentDueDateById = async (req, res) => {
-  const { contactId } = req.params;
-  const result = await Contact.findByIdAndUpdate(contactId, req.body, {
+  const { appointmentId } = req.params;
+  const result = await Appointment.findByIdAndUpdate(appointmentId, req.body, {
     new: true,
   });
 
@@ -166,8 +176,8 @@ const updateAppointmentDueDateById = async (req, res) => {
 };
 
 const updateAppointmentStatusById = async (req, res) => {
-  const { contactId } = req.params;
-  const result = await Contact.findByIdAndUpdate(contactId, req.body, {
+  const { appointmentId } = req.params;
+  const result = await Appointment.findByIdAndUpdate(appointmentId, req.body, {
     new: true,
   });
 
@@ -190,5 +200,5 @@ export {
   updateAppointmentNameById,
   updateAppointmentEmailById,
   updateAppointmentDueDateById,
-  updateAppointmentStatusById
+  updateAppointmentStatusById,
 };

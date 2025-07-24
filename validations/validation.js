@@ -5,7 +5,7 @@ const signupValidation = Joi.object({
   firstName: Joi.string().required(),
   lastName: Joi.string().required(),
   email: Joi.string()
-    .email({ minDomainSegments: 2, tlds: { allow: ["com", "net"] } })
+    .email({ minDomainSegments: 2, tlds: { allow: ["com", "net", "uk"] } })
     .required()
     .messages({
       "any.required": "Missing required email field",
@@ -22,7 +22,7 @@ const signupValidation = Joi.object({
 // validation for login
 const loginValidation = Joi.object({
   email: Joi.string()
-    .email({ minDomainSegments: 2, tlds: { allow: ["com", "net"] } })
+    .email({ minDomainSegments: 2, tlds: { allow: ["com", "net", "uk"] } })
     .required()
     .messages({
       "any.required": "Missing required email field",
@@ -35,26 +35,22 @@ const loginValidation = Joi.object({
   }),
 });
 
-// validation for updating client name
-const updateNameValidation = Joi.object({
-  name: Joi.string().required()
-});
-
-// validation for updating a contacts email
-const updateEmailValidation = Joi.object({
-  email: Joi.string()
-    .email({ minDomainSegments: 2, tlds: { allow: ["com", "net"] } })
+// validation for adding Customer Appointment
+const appointmentValidation = Joi.object({
+  name: Joi.string().max(30).required().messages({
+    "string.max": "Customer name cannot be longer than {#limit} characters",
+  }),
+  dueDate: Joi.date()
+    .iso() // Ensures ISO 8601 format (e.g., "2023-12-31T12:00:00Z")
+    .min("now") // Rejects past dates
     .required()
     .messages({
-      "any.required": "Missing required email field",
-      "string.email": "Invalid email format",
+      "date.base": "Due date must be a valid date",
+      "date.format":
+        "Due date must be in ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
+      "date.min": "Due date cannot be in the past",
+      "any.required": "Due date is required",
     }),
-});
-
-// validation for adding/updating a contact
-const contactValidation = Joi.object({
-  name: Joi.string().required(),
-  dueDate: Joi.string().required(),
 });
 
 // validation for updating favorite field
@@ -62,12 +58,30 @@ const favoriteValidation = Joi.object({
   favorite: Joi.bool().required(),
 });
 
+// validation for updating Customer name
+const updateAppointmentNameValidation = Joi.object({
+  name: Joi.string().max(30).required().messages({
+    "string.max": "Customer name cannot be longer than {#limit} characters",
+  }),
+});
+
+// validation for updating a Customer email
+const updateAppointmentEmailValidation = Joi.object({
+  email: Joi.string()
+    .email({ minDomainSegments: 2, tlds: { allow: ["com", "net", "uk"] } })
+    .required()
+    .messages({
+      "any.required": "Missing required email field",
+      "string.email": "Invalid email format",
+    }),
+});
+
 // prettier-ignore
 export {
-  updateNameValidation,
-  updateEmailValidation,
-  contactValidation,
+  updateAppointmentNameValidation,
+  updateAppointmentEmailValidation,
+  appointmentValidation,
   favoriteValidation,
   signupValidation,
-  loginValidation
+  loginValidation,
 };

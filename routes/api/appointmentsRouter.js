@@ -10,7 +10,7 @@ import {
   updateAppointmentEmailById,
   updateAppointmentDueDateById,
   updateAppointmentStatusById,
-  updateClientAvatar
+  updateClientAvatar,
 } from "../../controllers/appointmentsController.js";
 import { authenticateToken } from "../../middlewares/authenticateToken.js";
 import { upload } from "../../middlewares/upload.js";
@@ -20,24 +20,24 @@ const router = express.Router();
 
 router.get("/", authenticateToken, ctrlWrapper(getAllAppointments));
 
-router.get("/:contactId", authenticateToken, ctrlWrapper(getAppointmentById));
+router.get("/:appointmentId", authenticateToken, ctrlWrapper(getAppointmentById));
 
 router.post("/", authenticateToken, ctrlWrapper(addAppointment));
 
-router.delete("/:contactId", authenticateToken, ctrlWrapper(deleteAppointmentById));
+router.delete("/:appointmentId", authenticateToken, ctrlWrapper(deleteAppointmentById));
 
-router.patch("/avatars/:contactId", authenticateToken, upload.single("avatar"), ctrlWrapper(updateClientAvatar));
-
-
-router.patch("/nameupdate/:contactId", authenticateToken, ctrlWrapper(updateAppointmentNameById));
+router.patch("/avatars/:appointmentId", authenticateToken, upload.single("avatar"), ctrlWrapper(updateClientAvatar));
 
 
-router.patch("/emailupdate/:contactId", authenticateToken, ctrlWrapper(updateAppointmentEmailById));
+router.patch("/nameupdate/:appointmentId", authenticateToken, ctrlWrapper(updateAppointmentNameById));
 
 
-router.patch("/phoneupdate/:contactId", authenticateToken, ctrlWrapper(updateAppointmentDueDateById));
+router.patch("/emailupdate/:appointmentId", authenticateToken, ctrlWrapper(updateAppointmentEmailById));
 
-router.patch("/taskupdate/:contactId", authenticateToken, ctrlWrapper(updateAppointmentStatusById));
+
+router.patch("/phoneupdate/:appointmentId", authenticateToken, ctrlWrapper(updateAppointmentDueDateById));
+
+router.patch("/taskupdate/:appointmentId", authenticateToken, ctrlWrapper(updateAppointmentStatusById));
 
 
 

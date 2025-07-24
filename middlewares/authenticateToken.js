@@ -12,14 +12,14 @@ const authenticateToken = async (req, _res, next) => {
 
   try {
      if (bearer !== "Bearer") {
-      throw httpError(401);
+      throw httpError(401, "Unauthorized");
      }
 
     const { id } = jwt.verify(token, SECRET_KEY);
     const user = await User.findById(id);
 
     if (!user || user.token !== token || !user.token) {
-      throw httpError(401);
+      throw httpError(401, "Unauthorized");
     }
 
     req.user = user;
