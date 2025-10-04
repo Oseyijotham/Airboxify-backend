@@ -5,15 +5,13 @@ import "dotenv/config";
 const { SECRET_KEY } = process.env;
 
 const authenticateToken = async (req, _res, next) => {
-  const { authorization = "" } = req.headers;
+  const { authorization = "" } = req.headers; //If the authorization header doesn't exist, it defaults to an empty string ("")
   const [bearer, token] = authorization.split(" ");
 
-  
-
   try {
-     if (bearer !== "Bearer") {
+    if (bearer !== "Bearer") {
       throw httpError(401, "Unauthorized");
-     }
+    }
 
     const { id } = jwt.verify(token, SECRET_KEY);
     const user = await User.findById(id);
