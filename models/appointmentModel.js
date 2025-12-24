@@ -29,7 +29,8 @@ const appointmentSchema = new Schema(
     },
     avatarURL: {
       type: String,
-      default: "https://airboxify-backend.onrender.com/avatars/unknownCustomer.png",
+      default:
+        "https://airboxify-backend-wz8v.onrender.com/avatars/unknownCustomer.png",
     },
     /*avatarURL: {
       type: String,
