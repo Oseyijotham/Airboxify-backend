@@ -25,7 +25,7 @@ const userSchema = new Schema(
     },
     avatarURL: {
       type: String,
-      default: "https://airboxify-backend-wz8v.onrender.com/avatars/unknownUser.png",
+      default: "https://airboxify-backend.onrender.com/avatars/unknownUser.png",
     },
     /*avatarURL: {
       type: String,
